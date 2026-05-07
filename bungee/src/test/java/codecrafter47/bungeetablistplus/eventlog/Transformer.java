@@ -45,7 +45,7 @@ public class Transformer {
     }
 
     public TabListItemWrapper wrapTabListItem(PlayerListItem.Item item) {
-        return new TabListItemWrapper(item.getUuid().toString(), item.getUsername(), item.getDisplayName(), item.getPing(), item.getGamemode(), wrapProperties(Property119Handler.getProperties(item)));
+        return new TabListItemWrapper(item.getUuid().toString(), item.getUsername(), item.getDisplayName() != null ? item.getDisplayName().toLegacyText() : null, item.getPing(), item.getGamemode(), wrapProperties(Property119Handler.getProperties(item)));
     }
 
     public PlayerListPacketWrapper wrapPlayerListPacket(PlayerListItem packet) {
@@ -100,7 +100,7 @@ public class Transformer {
             PlayerListItem.Item item = new PlayerListItem.Item();
             item.setUuid(UUID.fromString(uuid));
             item.setUsername(username);
-            item.setDisplayName(displayName);
+            item.setDisplayName(displayName != null ? new net.md_5.bungee.api.chat.TextComponent(displayName) : null);
             item.setPing(ping);
             item.setGamemode(gamemode);
             Property119Handler.setProperties(item, new String[][]{{"textures", properties, null}});

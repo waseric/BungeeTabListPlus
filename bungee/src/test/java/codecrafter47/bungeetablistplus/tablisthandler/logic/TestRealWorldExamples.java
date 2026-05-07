@@ -20,14 +20,23 @@ package codecrafter47.bungeetablistplus.tablisthandler.logic;
 import codecrafter47.bungeetablistplus.eventlog.EventLogger;
 import codecrafter47.bungeetablistplus.eventlog.Transformer;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
+import com.google.gson.TypeAdapterFactory;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 import de.codecrafter47.taboverlay.config.misc.ChatFormat;
 import lombok.SneakyThrows;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.protocol.util.Either;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -37,7 +46,27 @@ import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public class TestRealWorldExamples extends AbstractTabListLogicTestBase {
-    private static Gson gson = new Gson();
+    private static Gson gson = new GsonBuilder()
+            .registerTypeAdapterFactory(new TypeAdapterFactory() {
+                @Override
+                @SuppressWarnings("unchecked")
+                public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+                    if (type.getRawType() != Either.class) return null;
+                    return (TypeAdapter<T>) new TypeAdapter<Either<String, ?>>() {
+                        @Override
+                        public void write(JsonWriter out, Either<String, ?> value) throws IOException {
+                            if (value == null) out.nullValue();
+                            else out.value(value.getLeft());
+                        }
+                        @Override
+                        public Either<String, ?> read(JsonReader in) throws IOException {
+                            if (in.peek() == JsonToken.NULL) { in.nextNull(); return null; }
+                            return Either.left(in.nextString());
+                        }
+                    };
+                }
+            })
+            .create();
 
     private final String fileName;
 

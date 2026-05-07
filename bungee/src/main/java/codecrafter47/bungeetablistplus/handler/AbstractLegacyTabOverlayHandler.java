@@ -820,7 +820,7 @@ public abstract class AbstractLegacyTabOverlayHandler implements PacketHandler, 
      */
     private static String getName(PlayerListItem.Item item) {
         if (item.getDisplayName() != null) {
-            return item.getDisplayName().toLegacyText();
+            return item.getDisplayName().toPlainText();
         } else if (item.getUsername() != null) {
             return item.getUsername();
         } else {

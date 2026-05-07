@@ -1,17 +1,14 @@
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
         gradlePluginPortal()
-    }
-    dependencies {
-        classpath 'ru.vyarus:gradle-quality-plugin:4.4.0'
     }
 }
 
 ext {
     spigotVersion = '1.11-R0.1-SNAPSHOT'
     bungeeVersion = '1.21-R0.4-SNAPSHOT'
-    velocityVersion = '3.4.0-SNAPSHOT'
+    velocityVersion = '3.4.0'
     adventureVersion = '4.18.0'
     spongeVersion = '7.0.0'
     dataApiVersion = '1.0.2-SNAPSHOT'
@@ -25,7 +22,6 @@ allprojects {
 subprojects {
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
-    apply plugin: 'ru.vyarus.quality'
 
     repositories {
         mavenCentral()
@@ -46,10 +42,6 @@ subprojects {
         }
 
         maven {
-            url = 'https://papermc.io/repo/repository/maven-snapshots/'
-        }
-
-        maven {
             url = 'https://repo.papermc.io/repository/maven-public/'
         }
 
@@ -65,9 +57,6 @@ subprojects {
             url = 'https://oss.sonatype.org/content/repositories/snapshots'
         }
 
-        maven {
-            url = 'https://nexus.prgm.in/repository/maven-public/'
-        }
     }
 
     dependencies {
@@ -102,10 +91,6 @@ subprojects {
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
-    }
-
-    quality {
-        strict = false
     }
 
     tasks.withType(Javadoc) {

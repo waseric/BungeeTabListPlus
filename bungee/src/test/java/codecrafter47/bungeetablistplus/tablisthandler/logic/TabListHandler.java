@@ -47,6 +47,16 @@ public class TabListHandler implements PacketHandler {
     }
 
     @Override
+    public PacketListenerResult onPlayerListUpdatePacket(net.md_5.bungee.protocol.packet.PlayerListItemUpdate packet) {
+        return parent != null ? parent.onPlayerListUpdatePacket(packet) : PacketListenerResult.PASS;
+    }
+
+    @Override
+    public PacketListenerResult onPlayerListRemovePacket(net.md_5.bungee.protocol.packet.PlayerListItemRemove packet) {
+        return parent != null ? parent.onPlayerListRemovePacket(packet) : PacketListenerResult.PASS;
+    }
+
+    @Override
     public PacketListenerResult onTeamPacket(Team packet) {
         return parent != null ? parent.onTeamPacket(packet) : PacketListenerResult.PASS;
     }

@@ -45,6 +45,11 @@ dependencies {
     compileOnly "org.geysermc.floodgate:api:2.0-SNAPSHOT"
 }
 
+tasks.withType(Test) {
+    jvmArgs '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED'
+    jvmArgs '--add-opens', 'java.desktop/java.awt.color=ALL-UNNAMED'
+}
+
 processResources {
     filesMatching("plugin.yml") {
         expand(project.properties)

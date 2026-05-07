@@ -525,8 +525,8 @@ public class AbstractTabOverlayHandlerTest {
                 net.md_5.bungee.protocol.packet.Team team = new net.md_5.bungee.protocol.packet.Team("Team " + i);
                 team.setPlayers(new String[]{usernames[i]});
                 team.setMode((byte) 0);
-                team.setCollisionRule("always");
-                team.setNameTagVisibility("always");
+                team.setCollisionRule(net.md_5.bungee.protocol.util.Either.left("always"));
+                team.setNameTagVisibility(net.md_5.bungee.protocol.util.Either.left("always"));
                 tabOverlayHandler.onTeamPacket(team);
             }
         }
@@ -586,8 +586,8 @@ public class AbstractTabOverlayHandlerTest {
             net.md_5.bungee.protocol.packet.Team team = new net.md_5.bungee.protocol.packet.Team("Team " + i);
             team.setPlayers(new String[]{usernames[i]});
             team.setMode((byte) 0);
-            team.setCollisionRule("always");
-            team.setNameTagVisibility("always");
+            team.setCollisionRule(net.md_5.bungee.protocol.util.Either.left("always"));
+            team.setNameTagVisibility(net.md_5.bungee.protocol.util.Either.left("always"));
             tabOverlayHandler.onTeamPacket(team);
         }
 
@@ -633,9 +633,9 @@ public class AbstractTabOverlayHandlerTest {
                 net.md_5.bungee.protocol.packet.Team team = new net.md_5.bungee.protocol.packet.Team("Team " + i);
                 team.setPlayers(new String[]{usernames[i]});
                 team.setMode((byte) 0);
-                team.setPrefix("prefix " + i);
-                team.setCollisionRule("always");
-                team.setNameTagVisibility("always");
+                team.setPrefix(net.md_5.bungee.protocol.util.Either.left("prefix " + i));
+                team.setCollisionRule(net.md_5.bungee.protocol.util.Either.left("always"));
+                team.setNameTagVisibility(net.md_5.bungee.protocol.util.Either.left("always"));
                 tabOverlayHandler.onTeamPacket(team);
             }
         }
@@ -654,9 +654,9 @@ public class AbstractTabOverlayHandlerTest {
 
         net.md_5.bungee.protocol.packet.Team team = new net.md_5.bungee.protocol.packet.Team("Team " + 0);
         team.setMode((byte) 2);
-        team.setPrefix("Test");
-        team.setCollisionRule("always");
-        team.setNameTagVisibility("always");
+        team.setPrefix(net.md_5.bungee.protocol.util.Either.left("Test"));
+        team.setCollisionRule(net.md_5.bungee.protocol.util.Either.left("always"));
+        team.setNameTagVisibility(net.md_5.bungee.protocol.util.Either.left("always"));
         tabOverlayHandler.onTeamPacket(team);
 
         assertEquals("Test", clientTabList.teams.get(clientTabList.playerToTeamMap.get(usernames[0])).getPrefix());
@@ -689,9 +689,9 @@ public class AbstractTabOverlayHandlerTest {
         net.md_5.bungee.protocol.packet.Team team = new net.md_5.bungee.protocol.packet.Team("Team " + 0);
         team.setPlayers(new String[]{usernames[0]});
         team.setMode((byte) 0);
-        team.setPrefix("prefix " + 0);
-        team.setCollisionRule("always");
-        team.setNameTagVisibility("never");
+        team.setPrefix(net.md_5.bungee.protocol.util.Either.left("prefix " + 0));
+        team.setCollisionRule(net.md_5.bungee.protocol.util.Either.left("always"));
+        team.setNameTagVisibility(net.md_5.bungee.protocol.util.Either.left("never"));
         tabOverlayHandler.onTeamPacket(team);
 
         assertEquals("never", clientTabList.teams.get(clientTabList.playerToTeamMap.get(usernames[0])).getNameTagVisibility());
@@ -715,9 +715,9 @@ public class AbstractTabOverlayHandlerTest {
                 net.md_5.bungee.protocol.packet.Team team = new net.md_5.bungee.protocol.packet.Team("Team " + i);
                 team.setPlayers(new String[]{usernames[i]});
                 team.setMode((byte) 0);
-                team.setPrefix("prefix " + i);
-                team.setCollisionRule("always");
-                team.setNameTagVisibility("always");
+                team.setPrefix(net.md_5.bungee.protocol.util.Either.left("prefix " + i));
+                team.setCollisionRule(net.md_5.bungee.protocol.util.Either.left("always"));
+                team.setNameTagVisibility(net.md_5.bungee.protocol.util.Either.left("always"));
                 tabOverlayHandler.onTeamPacket(team);
             }
         }
@@ -1013,7 +1013,7 @@ public class AbstractTabOverlayHandlerTest {
         private int gamemode;
 
         private TabListEntry(PlayerListItem.Item item) {
-            this(item.getUuid(), Property119Handler.getProperties(item), item.getUsername(), item.getDisplayName(), item.getPing(), item.getGamemode());
+            this(item.getUuid(), Property119Handler.getProperties(item), item.getUsername(), item.getDisplayName() != null ? net.md_5.bungee.chat.ComponentSerializer.toString(item.getDisplayName()) : null, item.getPing(), item.getGamemode());
         }
     }
 
@@ -1068,9 +1068,19 @@ public class AbstractTabOverlayHandlerTest {
         private final ClientTabList clientTabList;
 
         public MockTabOverlayHandler(ClientTabList clientTabList) {
-            super(Logger.getGlobal(), Runnable::run, clientUUID, false, false);
+            super(Logger.getGlobal(), Runnable::run, clientUUID, false, false, false, false);
             this.clientTabList = clientTabList;
             this.active = true;
+        }
+
+        @Override
+        public PacketListenerResult onPlayerListRemovePacket(net.md_5.bungee.protocol.packet.PlayerListItemRemove packet) {
+            return PacketListenerResult.PASS;
+        }
+
+        @Override
+        public PacketListenerResult onPlayerListUpdatePacket(net.md_5.bungee.protocol.packet.PlayerListItemUpdate packet) {
+            return PacketListenerResult.PASS;
         }
 
         @Override
@@ -1096,7 +1106,7 @@ public class AbstractTabOverlayHandlerTest {
                         case UPDATE_DISPLAY_NAME:
                             tabListEntry = clientTabList.entries.get(item.getUuid());
                             if (tabListEntry != null) {
-                                tabListEntry.setDisplayName(item.getDisplayName());
+                                tabListEntry.setDisplayName(item.getDisplayName() != null ? net.md_5.bungee.chat.ComponentSerializer.toString(item.getDisplayName()) : null);
                             }
                             break;
                         case REMOVE_PLAYER:
@@ -1123,18 +1133,19 @@ public class AbstractTabOverlayHandlerTest {
                     }
 
                     if (t != null) {
-                        if (((net.md_5.bungee.protocol.packet.Team) packet).getMode() == 0 || ((net.md_5.bungee.protocol.packet.Team) packet).getMode() == 2) {
-                            t.setDisplayName(((net.md_5.bungee.protocol.packet.Team) packet).getDisplayName());
-                            t.setPrefix(((net.md_5.bungee.protocol.packet.Team) packet).getPrefix());
-                            t.setSuffix(((net.md_5.bungee.protocol.packet.Team) packet).getSuffix());
-                            t.setFriendlyFire(((net.md_5.bungee.protocol.packet.Team) packet).getFriendlyFire());
-                            t.setNameTagVisibility(((net.md_5.bungee.protocol.packet.Team) packet).getNameTagVisibility());
-                            t.setCollisionRule(((net.md_5.bungee.protocol.packet.Team) packet).getCollisionRule());
-                            t.setColor(((net.md_5.bungee.protocol.packet.Team) packet).getColor());
+                        net.md_5.bungee.protocol.packet.Team tp = (net.md_5.bungee.protocol.packet.Team) packet;
+                        if (tp.getMode() == 0 || tp.getMode() == 2) {
+                            if (tp.getDisplayName() != null) t.setDisplayName(tp.getDisplayName().getLeft());
+                            if (tp.getPrefix() != null) t.setPrefix(tp.getPrefix().getLeft());
+                            if (tp.getSuffix() != null) t.setSuffix(tp.getSuffix().getLeft());
+                            t.setFriendlyFire(tp.getFriendlyFire());
+                            if (tp.getNameTagVisibility() != null) t.setNameTagVisibility(tp.getNameTagVisibility().getLeft());
+                            if (tp.getCollisionRule() != null) t.setCollisionRule(tp.getCollisionRule().getLeft());
+                            t.setColor(tp.getColor());
                         }
-                        if (((net.md_5.bungee.protocol.packet.Team) packet).getPlayers() != null) {
-                            for (String s : ((net.md_5.bungee.protocol.packet.Team) packet).getPlayers()) {
-                                if (((net.md_5.bungee.protocol.packet.Team) packet).getMode() == 0 || ((net.md_5.bungee.protocol.packet.Team) packet).getMode() == 3) {
+                        if (tp.getPlayers() != null) {
+                            for (String s : tp.getPlayers()) {
+                                if (tp.getMode() == 0 || tp.getMode() == 3) {
                                     if (clientTabList.playerToTeamMap.containsKey(s)) {
                                         clientTabList.teams.get(clientTabList.playerToTeamMap.get(s)).removePlayer(s);
                                     }

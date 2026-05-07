@@ -112,7 +112,7 @@ public class AbstractLegacyTabOverlayHandlerTest {
         packet.setItems(new PlayerListItem.Item[]{item});
 
         packet.setAction(PlayerListItem.Action.ADD_PLAYER);
-        item.setDisplayName("Player");
+        item.setDisplayName(new net.md_5.bungee.api.chat.TextComponent("Player"));
         item.setPing(15);
 
         tabListHandler.onPlayerListPacket(packet);
@@ -121,7 +121,7 @@ public class AbstractLegacyTabOverlayHandlerTest {
         assertEquals("Player", clientTabList.players.get(0));
         assertEquals((Object) 15, clientTabList.ping.get("Player"));
 
-        item.setDisplayName("PlayerB");
+        item.setDisplayName(new net.md_5.bungee.api.chat.TextComponent("PlayerB"));
 
         tabListHandler.onPlayerListPacket(packet);
 
@@ -227,15 +227,17 @@ public class AbstractLegacyTabOverlayHandlerTest {
                 for (PlayerListItem.Item item : ((PlayerListItem) packet).getItems()) {
                     switch (((PlayerListItem) packet).getAction()) {
                         case ADD_PLAYER:
-                            if (!clientTabList.ping.containsKey(item.getDisplayName())) {
-                                clientTabList.players.add(item.getDisplayName());
+                            String addName = item.getDisplayName() != null ? item.getDisplayName().toPlainText() : item.getUsername();
+                            if (!clientTabList.ping.containsKey(addName)) {
+                                clientTabList.players.add(addName);
                             }
-                            clientTabList.ping.put(item.getDisplayName(), item.getPing());
+                            clientTabList.ping.put(addName, item.getPing());
                             break;
                         case REMOVE_PLAYER:
-                            assertTrue(clientTabList.ping.containsKey(item.getDisplayName()));
-                            clientTabList.players.remove(item.getDisplayName());
-                            clientTabList.ping.remove(item.getDisplayName());
+                            String removeName = item.getDisplayName() != null ? item.getDisplayName().toPlainText() : item.getUsername();
+                            assertTrue(clientTabList.ping.containsKey(removeName));
+                            clientTabList.players.remove(removeName);
+                            clientTabList.ping.remove(removeName);
                             break;
                         default:
                             fail();
@@ -261,18 +263,19 @@ public class AbstractLegacyTabOverlayHandlerTest {
                     }
                     assertNotNull(t);
 
-                    if (((net.md_5.bungee.protocol.packet.Team) packet).getMode() == 0 || ((net.md_5.bungee.protocol.packet.Team) packet).getMode() == 2) {
-                        t.setDisplayName(((net.md_5.bungee.protocol.packet.Team) packet).getDisplayName());
-                        t.setPrefix(((net.md_5.bungee.protocol.packet.Team) packet).getPrefix());
-                        t.setSuffix(((net.md_5.bungee.protocol.packet.Team) packet).getSuffix());
-                        t.setFriendlyFire(((net.md_5.bungee.protocol.packet.Team) packet).getFriendlyFire());
-                        t.setNameTagVisibility(((net.md_5.bungee.protocol.packet.Team) packet).getNameTagVisibility());
-                        t.setCollisionRule(((net.md_5.bungee.protocol.packet.Team) packet).getCollisionRule());
-                        t.setColor(((net.md_5.bungee.protocol.packet.Team) packet).getColor());
+                    net.md_5.bungee.protocol.packet.Team tp = (net.md_5.bungee.protocol.packet.Team) packet;
+                    if (tp.getMode() == 0 || tp.getMode() == 2) {
+                        if (tp.getDisplayName() != null) t.setDisplayName(tp.getDisplayName().getLeft());
+                        if (tp.getPrefix() != null) t.setPrefix(tp.getPrefix().getLeft());
+                        if (tp.getSuffix() != null) t.setSuffix(tp.getSuffix().getLeft());
+                        t.setFriendlyFire(tp.getFriendlyFire());
+                        if (tp.getNameTagVisibility() != null) t.setNameTagVisibility(tp.getNameTagVisibility().getLeft());
+                        if (tp.getCollisionRule() != null) t.setCollisionRule(tp.getCollisionRule().getLeft());
+                        t.setColor(tp.getColor());
                     }
-                    if (((net.md_5.bungee.protocol.packet.Team) packet).getPlayers() != null) {
-                        for (String s : ((net.md_5.bungee.protocol.packet.Team) packet).getPlayers()) {
-                            if (((net.md_5.bungee.protocol.packet.Team) packet).getMode() == 0 || ((net.md_5.bungee.protocol.packet.Team) packet).getMode() == 3) {
+                    if (tp.getPlayers() != null) {
+                        for (String s : tp.getPlayers()) {
+                            if (tp.getMode() == 0 || tp.getMode() == 3) {
                                 if (clientTabList.playerToTeamMap.containsKey(s)) {
                                     clientTabList.teams.get(clientTabList.playerToTeamMap.get(s)).removePlayer(s);
                                 }

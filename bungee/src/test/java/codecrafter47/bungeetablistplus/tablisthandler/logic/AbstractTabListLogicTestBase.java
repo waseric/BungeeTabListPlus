@@ -76,7 +76,7 @@ public class AbstractTabListLogicTestBase {
         private int gamemode;
 
         private TabListEntry(PlayerListItem.Item item) {
-            this(item.getUuid(), Property119Handler.getProperties(item), item.getUsername(), item.getDisplayName(), item.getPing(), item.getGamemode());
+            this(item.getUuid(), Property119Handler.getProperties(item), item.getUsername(), item.getDisplayName() != null ? net.md_5.bungee.chat.ComponentSerializer.toString(item.getDisplayName()) : null, item.getPing(), item.getGamemode());
         }
     }
 
@@ -135,8 +135,18 @@ public class AbstractTabListLogicTestBase {
         private final ClientTabList clientTabList;
 
         public MockTabOverlayHandler(ClientTabList clientTabList) {
-            super(Logger.getGlobal(), Runnable::run, clientUUID, false, false);
+            super(Logger.getGlobal(), Runnable::run, clientUUID, false, false, false, false);
             this.clientTabList = clientTabList;
+        }
+
+        @Override
+        public PacketListenerResult onPlayerListRemovePacket(net.md_5.bungee.protocol.packet.PlayerListItemRemove packet) {
+            return PacketListenerResult.PASS;
+        }
+
+        @Override
+        public PacketListenerResult onPlayerListUpdatePacket(net.md_5.bungee.protocol.packet.PlayerListItemUpdate packet) {
+            return PacketListenerResult.PASS;
         }
 
         @Override
@@ -162,7 +172,7 @@ public class AbstractTabListLogicTestBase {
                         case UPDATE_DISPLAY_NAME:
                             tabListEntry = clientTabList.entries.get(item.getUuid());
                             if (tabListEntry != null) {
-                                tabListEntry.setDisplayName(item.getDisplayName());
+                                tabListEntry.setDisplayName(item.getDisplayName() != null ? net.md_5.bungee.chat.ComponentSerializer.toString(item.getDisplayName()) : null);
                             }
                             break;
                         case REMOVE_PLAYER:
@@ -190,12 +200,13 @@ public class AbstractTabListLogicTestBase {
 
                     if (t != null) {
                         if (((net.md_5.bungee.protocol.packet.Team) packet).getMode() == 0 || ((net.md_5.bungee.protocol.packet.Team) packet).getMode() == 2) {
-                            t.setDisplayName(((net.md_5.bungee.protocol.packet.Team) packet).getDisplayName());
-                            t.setPrefix(((net.md_5.bungee.protocol.packet.Team) packet).getPrefix());
-                            t.setSuffix(((net.md_5.bungee.protocol.packet.Team) packet).getSuffix());
-                            t.setFriendlyFire(((net.md_5.bungee.protocol.packet.Team) packet).getFriendlyFire());
-                            t.setNameTagVisibility(((net.md_5.bungee.protocol.packet.Team) packet).getNameTagVisibility());
-                            t.setCollisionRule(((net.md_5.bungee.protocol.packet.Team) packet).getCollisionRule());
+                            net.md_5.bungee.protocol.packet.Team tp = (net.md_5.bungee.protocol.packet.Team) packet;
+                            if (tp.getDisplayName() != null) t.setDisplayName(tp.getDisplayName().getLeft());
+                            if (tp.getPrefix() != null) t.setPrefix(tp.getPrefix().getLeft());
+                            if (tp.getSuffix() != null) t.setSuffix(tp.getSuffix().getLeft());
+                            t.setFriendlyFire(tp.getFriendlyFire());
+                            if (tp.getNameTagVisibility() != null) t.setNameTagVisibility(tp.getNameTagVisibility().getLeft());
+                            if (tp.getCollisionRule() != null) t.setCollisionRule(tp.getCollisionRule().getLeft());
                             t.setColor(((net.md_5.bungee.protocol.packet.Team) packet).getColor());
                         }
                         if (((net.md_5.bungee.protocol.packet.Team) packet).getPlayers() != null) {
@@ -378,7 +389,7 @@ public class AbstractTabListLogicTestBase {
                     for (PlayerListItem.Item item : packet.getItems()) {
                         TabListEntry playerListEntry = serverTabList.get(item.getUuid());
                         if (playerListEntry != null) {
-                            playerListEntry.setDisplayName(item.getDisplayName());
+                            playerListEntry.setDisplayName(item.getDisplayName() != null ? net.md_5.bungee.chat.ComponentSerializer.toString(item.getDisplayName()) : null);
                         }
                     }
                     break;
